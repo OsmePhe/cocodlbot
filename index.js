@@ -24,8 +24,8 @@ function download(url,thumbnail,res,tweet) {
   // console.log(tweet);
   var fileName = url.substring(url.lastIndexOf('/')+1, url.lastIndexOf('?'));
   var thumbnailName = thumbnail.substring(thumbnail.lastIndexOf('/')+1);
-  const wstream = fs.createWriteStream('./downloaded/'+fileName);
-  const wstreamThumbNail = fs.createWriteStream('./downloaded/'+thumbnailName);
+  const wstream = fs.createWriteStream('../downloaded/'+fileName);///////////////////////////////.
+  const wstreamThumbNail = fs.createWriteStream('../downloaded/'+thumbnailName);/////////////////////////////////////.
   const stream = got.stream(url);
   const streamThumbNail = got.stream(thumbnail);
   var tempObjUrlId = {};
