@@ -59,7 +59,7 @@ function resolveAfter5Seconds(word) {
             var fileName = urlFromTweet.substring(urlFromTweet.lastIndexOf('/')+1, urlFromTweet.lastIndexOf('?'));
             var fileNameWithoutExt = fileName.slice(0,fileName.lastIndexOf('.'));
             if(fileNameWithoutExt) {
-              T.post('statuses/update',{status: "@" + tweet.user.screen_name + ' ' +'https://cocodlbot.herokuapp.com/home/tweet/'+fileNameWithoutExt, in_reply_to_status_id: tweet.id_str}, responseCallback);
+              T.post('statuses/update',{status: "@" + tweet.user.screen_name + ' ' +'https://www.cocodlbot.fr/home/tweet/'+fileNameWithoutExt, in_reply_to_status_id: tweet.id_str}, responseCallback);
             }
             download(urlFromTweet, thumbnail, res, tweet);
           }).catch((error) => {
