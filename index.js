@@ -4,7 +4,6 @@ const path = require('path');
 const fs = require('fs');
 const got = require('got');
 const express = require('express');
-// const notifier = require('node-notifier');
 const open = require('open');
 const Twit  = require('twit');
 const app = express();
@@ -51,10 +50,8 @@ function download(url,thumbnail,res,tweet) {
   streamThumbNail.on('downloadProgress', ({ transferred, total, percent }) => {
       const percentage = Math.round(percent * 100);
   });
-  console.log(res.data.entities.media[0].expanded_url);
 
   finalObj.push([tempObjUrlId, thumbnail.substring(thumbnail.lastIndexOf('/')+1), res.data.user.created_at + " %%% " + res.data.user.screen_name, tweet.user.created_at + " %%% " + tweet.user.screen_name, res.data.entities.media[0].expanded_url]);
-  console.log(finalObj);
   }
 function resolveAfter5Seconds(word) {
   return new Promise(resolve => {
@@ -75,15 +72,6 @@ function resolveAfter5Seconds(word) {
           }).catch((error) => {
               console.log(error);
           });
-          // notifier.notify({
-          //   title: tweet.user.name,
-          //   message: tweet.text
-          // });
-    
-          // notifier.on('click', async function(notifierObject, options, event) {
-          //   console.log('clicked');
-          //   await open(url);
-          // });
       });
     }, 5000);
   });
@@ -93,7 +81,6 @@ async function searchTweetByWord(word) {
   const response = await new Promise((resolve, reject) => {
     T.get('search/tweets', { q: word, count: 100}).then(res => {
         const tweets = res.data.statuses;
-        console.log(tweets);
         resolve(tweets);
 	  }).catch((error) => {
         console.log(error);
@@ -126,19 +113,13 @@ async function resultFile(id, res) {
           }
         });
       }else{
-        // db.getTweetFromDb(id,res).then(function(result) {
-        //   // console.log(result);
-        //   resolve(result);//finalObj
-        // });
         AllDataTweet.findOne({url_tweet: id }, { _id: 0, 'name.first': 0}).then(function(result) {
-          console.log(result);
-          resolve(result);//finalObj
+          resolve(result);
       });
       }
     }else{
       AllDataTweet.find().then(function(result) {
-          console.log(result);
-          resolve(result);//finalObj
+          resolve(result);
       });
     }
   },10000);
@@ -151,7 +132,6 @@ function responseCallback(err) {
     if(err) console.log("error:", err)
 }
 app.use(express.static('public'));
-// app.use(express.static(path.join(__dirname, 'public')));
 app.get('/home*', function (req, res) {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
