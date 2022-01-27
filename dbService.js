@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const AllDataTweet = require('./model/alltweet.model');
 
-mongoose.connect('mongodb://localhost:27017/cocodlbot', {useNewUrlParser : true}, (error)=>{
+mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser : true}, (error)=>{
     if(!error){
         console.log("Success");
     }else{
