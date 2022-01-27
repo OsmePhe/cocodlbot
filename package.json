@@ -24,9 +24,11 @@
     "fs": "0.0.1-security",
     "got": "^11.8.3",
     "https": "^1.0.0",
+    "mongoose": "^6.1.8",
     "mysql": "^2.18.1",
     "needle": "^3.0.0",
     "node-fetch": "^3.0.0",
+    "node-notifier": "^10.0.0",
     "nodemon": "^2.0.14",
     "notifier": "^0.2.0",
     "open": "^8.3.0",
@@ -38,8 +40,7 @@
     "twit": "^2.2.11",
     "util": "^0.12.4",
     "ws": "^8.2.3",
-    "xhr2": "^0.2.1",
-    "node-notifier": "^10.0.0"
+    "xhr2": "^0.2.1"
   },
   "devDependencies": {
     "node-notifier": "^10.0.0"

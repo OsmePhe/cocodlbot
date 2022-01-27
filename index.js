@@ -3,32 +3,40 @@ const https = require('https');
 const path = require('path');
 const fs = require('fs');
 const got = require('got');
-const express = require("express");
+const express = require('express');
 // const notifier = require('node-notifier');
 const open = require('open');
-const Twit  = require("twit");
+const Twit  = require('twit');
 const app = express();
 const dotenv = require('dotenv').config();
+const dbService = require('./dbService');
 var async = require('async');
+const mongoose = require('mongoose');
 const T = new Twit({
     consumer_key : process.env.REACT_APP_CONSUMER_KEY,
     consumer_secret : process.env.REACT_APP_CONSUMER_SECRET,
     access_token : process.env.REACT_APP_ACCESS_TOKEN,
     access_token_secret : process.env.REACT_APP_ACCESS_TOKEN_SECRET,
 });
+// const db = dbService.getDbServiceInstance();
+// const connection = require('./model');
 
 var objUrlId = {};
+var getAllData;
 var finalObj = [];
+const AllDataTweet = mongoose.model('DownloadInformation');
+
 searchTweetByWord('@cocodlbot');
+
 function download(url,thumbnail,res,tweet) {
-  // console.log(tweet);
   var fileName = url.substring(url.lastIndexOf('/')+1, url.lastIndexOf('?'));
   var thumbnailName = thumbnail.substring(thumbnail.lastIndexOf('/')+1);
-  const wstream = fs.createWriteStream('public/downloaded/'+fileName);///////////////////////////////'../downloaded/'
-  const wstreamThumbNail = fs.createWriteStream('public/downloaded/'+thumbnailName);/////////////////////////////////////'../downloaded/'
+  const wstream = fs.createWriteStream('public/downloaded/'+fileName);
+  const wstreamThumbNail = fs.createWriteStream('public/downloaded/'+thumbnailName);
   const stream = got.stream(url);
   const streamThumbNail = got.stream(thumbnail);
   var tempObjUrlId = {};
+  tempObjUrlId[fileName]= url;
   objUrlId[fileName]= url;
   tempObjUrlId[fileName]= url;
   stream.on('data', (chunk) => {
@@ -44,8 +52,10 @@ function download(url,thumbnail,res,tweet) {
       const percentage = Math.round(percent * 100);
   });
   console.log(res.data.entities.media[0].expanded_url);
+
   finalObj.push([tempObjUrlId, thumbnail.substring(thumbnail.lastIndexOf('/')+1), res.data.user.created_at + " %%% " + res.data.user.screen_name, tweet.user.created_at + " %%% " + tweet.user.screen_name, res.data.entities.media[0].expanded_url]);
-}
+  console.log(finalObj);
+  }
 function resolveAfter5Seconds(word) {
   return new Promise(resolve => {
     setTimeout(() => {
@@ -95,13 +105,41 @@ async function searchTweetByWord(word) {
     console.log(error);
   }
 }
-async function resultFile(id) {
+async function resultFile(id, res) {
   try {
   const response = await new Promise((resolve, reject) => {
     if(id){
-      resolve(objUrlId[id]);
+      if(finalObj.length !== 0){
+        db.postTweetToDb(finalObj[0],res);
+        var dataTweet = new AllDataTweet();
+        dataTweet.url_tweet = Object.keys(finalObj[0][0]);
+        dataTweet.id_tweet = Object.values(finalObj[0][0]);
+        dataTweet.thumbnail = finalObj[0][1];
+        dataTweet.user_info = finalObj[0][2];
+        dataTweet.tweet_info = finalObj[0][3];
+        dataTweet.expanded_url = finalObj[0][4];
+        dataTweet.save((err, doc) =>{
+          if(!err){
+            console.log(doc);
+          }else{
+            console.log('Error during record insertion : ' + err);
+          }
+        });
+      }else{
+        // db.getTweetFromDb(id,res).then(function(result) {
+        //   // console.log(result);
+        //   resolve(result);//finalObj
+        // });
+        AllDataTweet.findOne({url_tweet: id }, { _id: 0, 'name.first': 0}).then(function(result) {
+          console.log(result);
+          resolve(result);//finalObj
+      });
+      }
     }else{
-      resolve(finalObj);
+      AllDataTweet.find().then(function(result) {
+          console.log(result);
+          resolve(result);//finalObj
+      });
     }
   },10000);
     return response;
@@ -129,7 +167,7 @@ app.get("/tweet/", (req,res) => {
 app.get("/tweet/:searchTweet", (req,res) => {
   setTimeout(() => {
     console.log(req.params.searchTweet.replace(/%20/g, " "));
-    var result = resultFile(req.params.searchTweet.replace(/%20/g, " "));
+    var result = resultFile(req.params.searchTweet.replace(/%20/g, " "), res);
     result
     .then(data => res.json({data : data}))
     .catch(err => console.log(err));
