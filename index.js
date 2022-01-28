@@ -95,16 +95,18 @@ async function searchTweetByWord(word) {
 async function resultFile(id, res) {
   try {
   const response = await new Promise((resolve, reject) => {
+    console.log(id);
+    console.log(finalObj);
     if(id){
       if(finalObj.length !== 0){
-        db.postTweetToDb(finalObj[0],res);
         var dataTweet = new AllDataTweet();
-        dataTweet.url_tweet = Object.keys(finalObj[0][0]);
-        dataTweet.id_tweet = Object.values(finalObj[0][0]);
+        dataTweet.url_tweet = Object.keys(finalObj[0][0])[0];
+        dataTweet.id_tweet = Object.values(finalObj[0][0])[0];
         dataTweet.thumbnail = finalObj[0][1];
         dataTweet.user_info = finalObj[0][2];
         dataTweet.tweet_info = finalObj[0][3];
         dataTweet.expanded_url = finalObj[0][4];
+        console.log(dataTweet);
         dataTweet.save((err, doc) =>{
           if(!err){
             console.log(doc);
@@ -114,6 +116,7 @@ async function resultFile(id, res) {
         });
       }else{
         AllDataTweet.findOne({url_tweet: id }, { _id: 0, 'name.first': 0}).then(function(result) {
+          console.log(dataTweet);
           resolve(result);
       });
       }
