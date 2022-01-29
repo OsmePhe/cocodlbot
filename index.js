@@ -113,10 +113,12 @@ async function resultFile(id, res) {
                 console.log('Error during record insertion : ' + err);
               }
             });
+            resolve(dataTweet);
           }else{
-            console.log('Already in db !')
+            resolve(result);
           }
-          resolve(result);
+          
+          // resolve(result);
        });
       }else{
         AllDataTweet.findOne({url_tweet: id }, { _id: 0, 'name.first': 0}).then(function(result) {
