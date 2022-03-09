@@ -39,8 +39,8 @@ function download(url,thumbnail,res,tweet) {
 
   var fileName = url.substring(url.lastIndexOf('/')+1, url.lastIndexOf('?'));
   var thumbnailName = thumbnail.substring(thumbnail.lastIndexOf('/')+1);
-  const wstream = fs.createWriteStream('public/'+fileName);
-  const wstreamThumbNail = fs.createWriteStream('public/'+thumbnailName);
+  const wstream = fs.createWriteStream('public/downloaded/'+fileName);
+  const wstreamThumbNail = fs.createWriteStream('public/downloaded/'+thumbnailName);
   const stream = got.stream(url);
   const streamThumbNail = got.stream(thumbnail);
 
@@ -62,7 +62,7 @@ function download(url,thumbnail,res,tweet) {
     const percentage = Math.round(percent * 100);
   });
 
-  const fileContent = fs.readFileSync('public/'+thumbnailName);
+  const fileContent = fs.readFileSync('public/downloaded/'+thumbnailName);
   console.log("thumbnailNameBucket");
   const paramsBucket = {
     Bucket : process.env.S3_BUCKET_NAME,
