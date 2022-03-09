@@ -39,25 +39,30 @@ function download(url,thumbnail,res,tweet) {
 
   var fileName = url.substring(url.lastIndexOf('/')+1, url.lastIndexOf('?'));
   var thumbnailName = thumbnail.substring(thumbnail.lastIndexOf('/')+1);
-  console.log("fileName");
-  const wstream = fs.createWriteStream('./downloaded/'+fileName);
-  console.log("thumbnailName");
-  const wstreamThumbNail = fs.createWriteStream('./downloaded/'+thumbnailName);
+  const wstream = fs.createWriteStream('public/downloaded/'+fileName);
+  const wstreamThumbNail = fs.createWriteStream('public/downloaded/'+thumbnailName);
   const stream = got.stream(url);
   const streamThumbNail = got.stream(thumbnail);
+
+  var tempObjUrlId = {};
+  tempObjUrlId[fileName]= url;
+  objUrlId[fileName]= url;
+  tempObjUrlId[fileName]= url;
   
   stream.on('data', (chunk) => {
     wstream.write(chunk);
   });
   stream.on('downloadProgress', ({ transferred, total, percent }) => {
       const percentage = Math.round(percent * 100);
-      console.log(percentage);
   });
   streamThumbNail.on('data', (chunk) => {
     wstreamThumbNail.write(chunk);
   });
+  streamThumbNail.on('downloadProgress', ({ transferred, total, percent }) => {
+    const percentage = Math.round(percent * 100);
+  });
 
-  const fileContent = fs.readFileSync('./downloaded/'+thumbnailName);
+  const fileContent = fs.readFileSync('public/downloaded/'+thumbnailName);
   console.log("thumbnailNameBucket");
   const paramsBucket = {
     Bucket : process.env.S3_BUCKET_NAME,
@@ -73,16 +78,7 @@ function download(url,thumbnail,res,tweet) {
       console.log("success" + data.Location)
     }
   })
-
-  var tempObjUrlId = {};
-  tempObjUrlId[fileName]= url;
-  objUrlId[fileName]= url;
-  tempObjUrlId[fileName]= url;
-
-  // streamThumbNail.on('downloadProgress', ({ transferred, total, percent }) => {
-  //     const percentage = Math.round(percent * 100);
-  // });
-
+  console.log("Noooppppe");
   finalObj.push([tempObjUrlId, thumbnail.substring(thumbnail.lastIndexOf('/')+1), res.data.user.created_at + " %%% " + res.data.user.screen_name, tweet.user.created_at + " %%% " + tweet.user.screen_name, res.data.entities.media[0].expanded_url]);
   }
 
