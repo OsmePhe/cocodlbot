@@ -10,13 +10,21 @@ const app = express();
 const dotenv = require('dotenv').config();
 const dbService = require('./dbService');
 var async = require('async');
+const aws = require('aws-sdk');
 const mongoose = require('mongoose');
+
 const T = new Twit({
     consumer_key : process.env.REACT_APP_CONSUMER_KEY,
     consumer_secret : process.env.REACT_APP_CONSUMER_SECRET,
     access_token : process.env.REACT_APP_ACCESS_TOKEN,
     access_token_secret : process.env.REACT_APP_ACCESS_TOKEN_SECRET,
 });
+
+const s3 = new aws.S3({
+  accessKeyId : process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey : process.env.AWS_SECRET_ACCESS_KEY
+});
+
 // const db = dbService.getDbServiceInstance();
 // const connection = require('./model');
 
@@ -28,16 +36,14 @@ const AllDataTweet = mongoose.model('DownloadInformation');
 searchTweetByWord('@cocodlbot');
 
 function download(url,thumbnail,res,tweet) {
+
   var fileName = url.substring(url.lastIndexOf('/')+1, url.lastIndexOf('?'));
   var thumbnailName = thumbnail.substring(thumbnail.lastIndexOf('/')+1);
   const wstream = fs.createWriteStream('public/downloaded/'+fileName);
   const wstreamThumbNail = fs.createWriteStream('public/downloaded/'+thumbnailName);
   const stream = got.stream(url);
   const streamThumbNail = got.stream(thumbnail);
-  var tempObjUrlId = {};
-  tempObjUrlId[fileName]= url;
-  objUrlId[fileName]= url;
-  tempObjUrlId[fileName]= url;
+  
   stream.on('data', (chunk) => {
     wstream.write(chunk);
   });
@@ -47,12 +53,54 @@ function download(url,thumbnail,res,tweet) {
   streamThumbNail.on('data', (chunk) => {
     wstreamThumbNail.write(chunk);
   });
-  streamThumbNail.on('downloadProgress', ({ transferred, total, percent }) => {
-      const percentage = Math.round(percent * 100);
-  });
+
+  const fileContent = fs.readFileSync('public/downloaded/'+thumbnailName);
+  console.log(thumbnailName);
+  console.log(fileContent);
+  const paramsBucket = {
+    Bucket : process.env.S3_BUCKET_NAME,
+    Key : thumbnailName,
+    Body : fileContent,
+    content_type : 'image/JPG',
+  };
+
+  s3.upload(paramsBucket, (err, data) => {
+    if(err){
+      console.log(err); 
+    }else{
+      console.log("succes" + data.Location)
+    }
+  })
+
+  var tempObjUrlId = {};
+  tempObjUrlId[fileName]= url;
+  objUrlId[fileName]= url;
+  tempObjUrlId[fileName]= url;
+
+  // streamThumbNail.on('downloadProgress', ({ transferred, total, percent }) => {
+  //     const percentage = Math.round(percent * 100);
+  // });
 
   finalObj.push([tempObjUrlId, thumbnail.substring(thumbnail.lastIndexOf('/')+1), res.data.user.created_at + " %%% " + res.data.user.screen_name, tweet.user.created_at + " %%% " + tweet.user.screen_name, res.data.entities.media[0].expanded_url]);
   }
+
+  // function getSignedRequest(file){
+  //   const xhr = new XMLHttpRequest();
+  //   xhr.open('GET', `/sign-s3?file-name=${fileName}&file-type=${'jpg'}`);
+  //   xhr.onreadystatechange = () => {
+  //     if(xhr.readyState === 4){
+  //       if(xhr.status === 200){
+  //         const response = JSON.parse(xhr.responseText);
+  //         uploadFile(file, response.signedRequest, response.url);
+  //       }
+  //       else{
+  //         alert('Could not get signed URL.');
+  //       }
+  //     }
+  //   };
+  //   xhr.send();
+  // }
+  
 function resolveAfter5Seconds(word) {
   return new Promise(resolve => {
     setTimeout(() => {
@@ -76,6 +124,7 @@ function resolveAfter5Seconds(word) {
     }, 5000);
   });
 }
+
 async function searchTweetByWord(word) {
   try {
   const response = await new Promise((resolve, reject) => {
@@ -92,6 +141,15 @@ async function searchTweetByWord(word) {
     console.log(error);
   }
 }
+
+async function resultFile_1() {
+  console.log(process.env.S3_BUCKET_NAME);
+  const r = await s3.listObjectsV2({Bucket:process.env.S3_BUCKET_NAME}).promise();
+    let x = r.Contents.map(item=>item.Key);
+    console.log(x);
+    return x;
+  }
+
 async function resultFile(id, res) {
   try {
   const response = await new Promise((resolve, reject) => {
@@ -126,7 +184,7 @@ async function resultFile(id, res) {
       });
       }
     }else{
-      console.log(AllDataTweet);
+      resultFile_1();
       AllDataTweet.find().then(function(result) {
           console.log(result);
           resolve(result);
@@ -138,9 +196,11 @@ async function resultFile(id, res) {
     console.log(error);
   }
 }
+
 function responseCallback(err) {
     if(err) console.log("error:", err)
 }
+
 if(process.env.NODE_ENV === 'production') {
   console.log(process.env.NODE_ENV);
   app.use((req, res, next) => {
@@ -151,6 +211,7 @@ if(process.env.NODE_ENV === 'production') {
   })
 }
 app.use(express.static('public'));
+
 app.get('/home*', function (req, res) {
    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
