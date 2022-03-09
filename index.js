@@ -40,9 +40,9 @@ function download(url,thumbnail,res,tweet) {
   var fileName = url.substring(url.lastIndexOf('/')+1, url.lastIndexOf('?'));
   var thumbnailName = thumbnail.substring(thumbnail.lastIndexOf('/')+1);
   console.log("fileName");
-  const wstream = fs.createWriteStream('public/downloaded/'+fileName);
+  const wstream = fs.createWriteStream('./downloaded/'+fileName);
   console.log("thumbnailName");
-  const wstreamThumbNail = fs.createWriteStream('public/downloaded/'+thumbnailName);
+  const wstreamThumbNail = fs.createWriteStream('./downloaded/'+thumbnailName);
   const stream = got.stream(url);
   const streamThumbNail = got.stream(thumbnail);
   
@@ -57,22 +57,22 @@ function download(url,thumbnail,res,tweet) {
     wstreamThumbNail.write(chunk);
   });
 
-  // const fileContent = fs.readFileSync('public/downloaded/'+thumbnailName);
-  // console.log("thumbnailNameBucket");
-  // const paramsBucket = {
-  //   Bucket : process.env.S3_BUCKET_NAME,
-  //   Key : thumbnailName,
-  //   Body : fileContent,
-  //   content_type : 'image/JPG',
-  // };
+  const fileContent = fs.readFileSync('./downloaded/'+thumbnailName);
+  console.log("thumbnailNameBucket");
+  const paramsBucket = {
+    Bucket : process.env.S3_BUCKET_NAME,
+    Key : thumbnailName,
+    Body : fileContent,
+    content_type : 'image/JPG',
+  };
 
-  // s3.upload(paramsBucket, (err, data) => {
-  //   if(err){
-  //     console.log("errrrrrrrrrrrrroooooooooooorrrrBucket "+err); 
-  //   }else{
-  //     console.log("success" + data.Location)
-  //   }
-  // })
+  s3.upload(paramsBucket, (err, data) => {
+    if(err){
+      console.log("errrrrrrrrrrrrroooooooooooorrrrBucket "+err); 
+    }else{
+      console.log("success" + data.Location)
+    }
+  })
 
   var tempObjUrlId = {};
   tempObjUrlId[fileName]= url;
