@@ -62,22 +62,22 @@ function download(url,thumbnail,res,tweet) {
     const percentage = Math.round(percent * 100);
   });
 
-  const fileContent = fs.readFileSync('public/downloaded/'+thumbnailName);
+  // const fileContent = fs.readFileSync('public/downloaded/'+thumbnailName);
   console.log("thumbnailNameBucket");
-  const paramsBucket = {
-    Bucket : process.env.S3_BUCKET_NAME,
-    Key : thumbnailName,
-    Body : fileContent,
-    content_type : 'image/JPG',
-  };
+  // const paramsBucket = {
+  //   Bucket : process.env.S3_BUCKET_NAME,
+  //   Key : thumbnailName,
+  //   Body : fileContent,
+  //   content_type : 'image/JPG',
+  // };
 
-  s3.upload(paramsBucket, (err, data) => {
-    if(err){
-      console.log("errrrrrrrrrrrrroooooooooooorrrrBucket "+err); 
-    }else{
-      console.log("success" + data.Location)
-    }
-  })
+  // s3.upload(paramsBucket, (err, data) => {
+  //   if(err){
+  //     console.log("errrrrrrrrrrrrroooooooooooorrrrBucket "+err); 
+  //   }else{
+  //     console.log("success" + data.Location)
+  //   }
+  // })
   console.log("Noooppppe");
   finalObj.push([tempObjUrlId, thumbnail.substring(thumbnail.lastIndexOf('/')+1), res.data.user.created_at + " %%% " + res.data.user.screen_name, tweet.user.created_at + " %%% " + tweet.user.screen_name, res.data.entities.media[0].expanded_url]);
   }
