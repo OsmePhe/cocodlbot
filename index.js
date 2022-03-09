@@ -51,27 +51,28 @@ function download(url,thumbnail,res,tweet) {
   });
   stream.on('downloadProgress', ({ transferred, total, percent }) => {
       const percentage = Math.round(percent * 100);
+      console.log(percentage);
   });
   streamThumbNail.on('data', (chunk) => {
     wstreamThumbNail.write(chunk);
   });
 
-  const fileContent = fs.readFileSync('public/downloaded/'+thumbnailName);
-  console.log("thumbnailNameBucket");
-  const paramsBucket = {
-    Bucket : process.env.S3_BUCKET_NAME,
-    Key : thumbnailName,
-    Body : fileContent,
-    content_type : 'image/JPG',
-  };
+  // const fileContent = fs.readFileSync('public/downloaded/'+thumbnailName);
+  // console.log("thumbnailNameBucket");
+  // const paramsBucket = {
+  //   Bucket : process.env.S3_BUCKET_NAME,
+  //   Key : thumbnailName,
+  //   Body : fileContent,
+  //   content_type : 'image/JPG',
+  // };
 
-  s3.upload(paramsBucket, (err, data) => {
-    if(err){
-      console.log("errrrrrrrrrrrrroooooooooooorrrrBucket "+err); 
-    }else{
-      console.log("success" + data.Location)
-    }
-  })
+  // s3.upload(paramsBucket, (err, data) => {
+  //   if(err){
+  //     console.log("errrrrrrrrrrrrroooooooooooorrrrBucket "+err); 
+  //   }else{
+  //     console.log("success" + data.Location)
+  //   }
+  // })
 
   var tempObjUrlId = {};
   tempObjUrlId[fileName]= url;
