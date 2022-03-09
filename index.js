@@ -39,7 +39,9 @@ function download(url,thumbnail,res,tweet) {
 
   var fileName = url.substring(url.lastIndexOf('/')+1, url.lastIndexOf('?'));
   var thumbnailName = thumbnail.substring(thumbnail.lastIndexOf('/')+1);
+  console.log("fileName");
   const wstream = fs.createWriteStream('public/downloaded/'+fileName);
+  console.log("thumbnailName");
   const wstreamThumbNail = fs.createWriteStream('public/downloaded/'+thumbnailName);
   const stream = got.stream(url);
   const streamThumbNail = got.stream(thumbnail);
@@ -55,8 +57,7 @@ function download(url,thumbnail,res,tweet) {
   });
 
   const fileContent = fs.readFileSync('public/downloaded/'+thumbnailName);
-  console.log(thumbnailName);
-  console.log(fileContent);
+  console.log("thumbnailNameBucket");
   const paramsBucket = {
     Bucket : process.env.S3_BUCKET_NAME,
     Key : thumbnailName,
@@ -66,9 +67,9 @@ function download(url,thumbnail,res,tweet) {
 
   s3.upload(paramsBucket, (err, data) => {
     if(err){
-      console.log(err); 
+      console.log("errrrrrrrrrrrrroooooooooooorrrrBucket "+err); 
     }else{
-      console.log("succes" + data.Location)
+      console.log("success" + data.Location)
     }
   })
 
