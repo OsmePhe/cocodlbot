@@ -20,6 +20,9 @@ var AllDataTweet = new mongoose.Schema ({
         expanded_url : {
             type : String
         },
+        urlThumbnail : {
+            type : String
+        }
     });
 
     mongoose.model('DownloadInformation', AllDataTweet)
