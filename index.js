@@ -38,7 +38,7 @@ const AllDataTweet = mongoose.model('DownloadInformation');
 searchTweetByWord('@cocodlbot');
 
 function download(url,thumbnail,res,tweet) {
-
+  finalObj = [];
   var fileName = url.substring(url.lastIndexOf('/')+1, url.lastIndexOf('?'));
   var thumbnailName = thumbnail.substring(thumbnail.lastIndexOf('/')+1);
   // const wstream = fs.createWriteStream('public/downloaded/'+fileName);
@@ -174,8 +174,7 @@ async function resultFile(id, res) {
   const response = await new Promise((resolve, reject) => {
     if(id){
       if(finalObj.length !== 0){
-        console.log(finalObj.length);
-        console.log(AllDataTweet);
+        console.log(finalObj);
         AllDataTweet.findOne({url_tweet: id }, { _id: 0}).then(function(result) {
           if(!result){
             var dataTweet = new AllDataTweet();
