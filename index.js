@@ -32,13 +32,13 @@ const s3 = new aws.S3({
 
 var objUrlId = {};
 var getAllData;
-var finalObj = [];
+var finalObj = [], finalUser0 = [], finalUser1 = [];
 const AllDataTweet = mongoose.model('DownloadInformation');
 
 searchTweetByWord('@cocodlbot');
 
 function download(url,thumbnail,res,tweet) {
-  finalObj = [];
+  finalObj = [], finalUser0 = [], finalUser1 = [];
   var fileName = url.substring(url.lastIndexOf('/')+1, url.lastIndexOf('?'));
   var thumbnailName = thumbnail.substring(thumbnail.lastIndexOf('/')+1);
   // const wstream = fs.createWriteStream('public/downloaded/'+fileName);
@@ -96,11 +96,13 @@ function download(url,thumbnail,res,tweet) {
   //     console.log('success' + data.Location)
   //   }
   // })
-  console.log('Noooppppe');
+  finalUser0.push(res.data.user.screen_name);
+  finalUser1.push(tweet.user.screen_name);
   finalObj.push([tempObjUrlId, thumbnail, res.data.user.created_at + ' %%% ' + res.data.user.screen_name, tweet.user.created_at + ' %%% ' + tweet.user.screen_name, res.data.entities.media[0].expanded_url]);
   }
   
-function resolveAfter5Seconds(word) {
+
+  function resolveAfter5Seconds(word) {
   return new Promise(resolve => {
     setTimeout(() => {
       var stream = T.stream('statuses/filter', { track: word })
@@ -174,8 +176,7 @@ async function resultFile(id, res) {
   const response = await new Promise((resolve, reject) => {
     if(id){
       if(finalObj.length !== 0){
-        console.log(finalObj);
-        AllDataTweet.findOne({url_tweet: id }, { _id: 0}).then(function(result) {
+        AllDataTweet.findOne({url_tweet: id.searchTweet }, { _id: 0}).then(function(result) {
           if(!result){
             var dataTweet = new AllDataTweet();
             dataTweet.url_tweet = Object.keys(finalObj[0][0])[0];
@@ -184,6 +185,8 @@ async function resultFile(id, res) {
             dataTweet.user_info = finalObj[0][2];
             dataTweet.tweet_info = finalObj[0][3];
             dataTweet.expanded_url = finalObj[0][4];
+            dataTweet.tweet_sc = finalUser1[0];
+            dataTweet.user_sc = finalUser0[0];
             // dataTweet.urlThumbnail = '';
             dataTweet.save((err, doc) =>{
               if(!err){
@@ -200,9 +203,17 @@ async function resultFile(id, res) {
           // resolve(result);
        });
       }else{
-        AllDataTweet.findOne({url_tweet: id }, { _id: 0, 'name.first': 0}).then(function(result) {
-          resolve(result);
-      });
+        if(id.searchBar !== "1"){
+          AllDataTweet.findOne({url_tweet: id.searchTweet }, { _id: 0}).then(function(result) {
+            console.log(result);
+            resolve(result);
+          });
+        }else{
+          AllDataTweet.find({$or:[{url_tweet: id.searchTweet }, { user_sc: id.searchTweet }, { tweet_sc: id.searchTweet}]}, { _id: 0}).then(function(result) {
+            console.log(result);
+            resolve(result);
+          });
+        }
       }
     }else{
       AllDataTweet.find().then(function(result) {
@@ -243,9 +254,9 @@ app.get('/tweet/', (req,res) => {
     .catch(err => console.log(err));
     }, 3000);
 });
-app.get('/tweet/:searchTweet', (req,res) => {
+app.get('/tweet/:searchTweet/:searchBar', (req,res) => {
   setTimeout(() => {
-    var result = resultFile(req.params.searchTweet.replace(/%20/g, ' '), res);
+    var result = resultFile({searchTweet: req.params.searchTweet.replace(/%20/g, ' '), searchBar: req.params.searchBar.replace(/%20/g, ' ')}, res);
     result
     .then(data => res.json({data : data}))
     .catch(err => console.log(err));

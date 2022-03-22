@@ -22,6 +22,12 @@ var AllDataTweet = new mongoose.Schema ({
         },
         urlThumbnail : {
             type : String
+        },
+        tweet_sc : {
+            type : String
+        },
+        user_sc : {
+            type : String
         }
     });
 
