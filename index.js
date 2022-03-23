@@ -37,13 +37,24 @@ const AllDataTweet = mongoose.model('DownloadInformation');
 
 searchTweetByWord('@cocodlbot');
 
+function uploadFile(thumbnailName,thumbnailStream) {
+
+  const uploadParams = {
+    Bucket: process.env.S3_BUCKET_NAME,
+    Body: thumbnailStream,
+    Key: thumbnailName
+  }
+
+  return s3.upload(uploadParams).promise()
+}
+
 function download(url,thumbnail,res,tweet) {
   finalObj = [], finalUser0 = [], finalUser1 = [];
   var fileName = url.substring(url.lastIndexOf('/')+1, url.lastIndexOf('?'));
   var thumbnailName = thumbnail.substring(thumbnail.lastIndexOf('/')+1);
   // const wstream = fs.createWriteStream('public/downloaded/'+fileName);
-  const wstreamThumbNail = fs.createWriteStream(thumbnailName);
   // const stream = got.stream(url);
+  const wstreamThumbNail = fs.createWriteStream(thumbnailName);
   const streamThumbNail = got.stream(thumbnail);
 
   var tempObjUrlId = {};
@@ -58,27 +69,35 @@ function download(url,thumbnail,res,tweet) {
   //     const percentage = Math.round(percent * 100);
   // });
 
+  // streamThumbNail.on('data', (chunk) => {
+  //   wstreamThumbNail.write(chunk);
+  // });
   ///////////////////////////////////Add to AWS////////////////////////
-  streamThumbNail.on('data', (chunk) => {
-    console.log('Uploading "' + thumbnailName + '" to S3');
-    const paramsBucket = {
-      Bucket : process.env.S3_BUCKET_NAME,
-      Key : thumbnailName,
-      Body : fs.createReadStream(thumbnailName),//fileContent
-      content_type : 'image/JPG',
-    };
-    s3.upload(paramsBucket, (err, data) => {
-      if(err){
-        console.log('errrrrrrrrrrrrroooooooooooorrrrBucket '+err); 
-      }else{
-        console.log('success' + data.Location)
-      }
-    })
-    // wstreamThumbNail.write(chunk);
-  });
-  streamThumbNail.on('downloadProgress', ({ transferred, total, percent }) => {
-    const percentage = Math.round(percent * 100);
-  });
+  uploadFile(thumbnailName,fs.createReadStream(thumbnailName));
+  // const fileStream = fs.createReadStream(thumbnailName);
+  // streamThumbNail.on('data', (chunk) => {
+  //   console.log('Uploading "' + thumbnailName + '" to S3');
+  //   s3.createBucket(function(){
+  //     const paramsBucket = {
+  //       Bucket : process.env.S3_BUCKET_NAME,
+  //       Key : thumbnailName,
+  //       Body : fileStream//fileContent
+  //       // content_type : 'image/JPG',
+  //     };
+  //     console.log(paramsBucket);
+  //     s3.upload(paramsBucket, (err, data) => {
+  //       if(err){
+  //         console.log('errrrrrrrrrrrrroooooooooooorrrrBucket '+err); 
+  //       }else{
+  //         console.log('success' + data)
+  //       }
+  //     })
+  //   });
+  //   // wstreamThumbNail.write(chunk);
+  // });
+  // streamThumbNail.on('downloadProgress', ({ transferred, total, percent }) => {
+  //   const percentage = Math.round(percent * 100);
+  // });
 
   // const fileContent = fs.readFileSync('public/downloaded/'+thumbnailName);
   // console.log('thumbnailNameBucket');
@@ -96,9 +115,11 @@ function download(url,thumbnail,res,tweet) {
   //     console.log('success' + data.Location)
   //   }
   // })
-  finalUser0.push(res.data.user.screen_name);
-  finalUser1.push(tweet.user.screen_name);
-  finalObj.push([tempObjUrlId, thumbnail, res.data.user.created_at + ' %%% ' + res.data.user.screen_name, tweet.user.created_at + ' %%% ' + tweet.user.screen_name, res.data.entities.media[0].expanded_url]);
+
+
+  // finalUser0.push(res.data.user.screen_name);
+  // finalUser1.push(tweet.user.screen_name);
+  // finalObj.push([tempObjUrlId, thumbnail, res.data.user.created_at + ' %%% ' + res.data.user.screen_name, tweet.user.created_at + ' %%% ' + tweet.user.screen_name, res.data.entities.media[0].expanded_url]);
   }
   
 
