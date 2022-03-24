@@ -185,8 +185,8 @@ async function resultFile(id, res) {
             dataTweet.user_info = finalObj[0][2];
             dataTweet.tweet_info = finalObj[0][3];
             dataTweet.expanded_url = finalObj[0][4];
-            dataTweet.tweet_sc = finalUser1[0];
-            dataTweet.user_sc = finalUser0[0];
+            dataTweet.tweet_sc = finalUser1[0].toUpperCase();
+            dataTweet.user_sc = finalUser0[0].toUpperCase();
             // dataTweet.urlThumbnail = '';
             dataTweet.save((err, doc) =>{
               if(!err){
@@ -209,7 +209,7 @@ async function resultFile(id, res) {
             resolve(result);
           });
         }else{
-          AllDataTweet.find({$or:[{url_tweet: id.searchTweet }, { user_sc: id.searchTweet }, { tweet_sc: id.searchTweet}]}, { _id: 0}).then(function(result) {
+          AllDataTweet.find({$or:[{url_tweet: id.searchTweet }, { user_sc: id.searchTweet.toUpperCase() }, { tweet_sc: id.searchTweet.toUpperCase()}]}, { _id: 0}).then(function(result) {
             console.log(result);
             resolve(result);
           });
