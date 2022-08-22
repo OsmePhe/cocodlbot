@@ -59,12 +59,18 @@ function download(url,thumbnail,res,tweet) {
   // });
 
   ///////////////////////////////////Add to AWS////////////////////////
+
+  
   streamThumbNail.on('data', (chunk) => {
     console.log('Uploading "' + thumbnailName + '" to S3');
+    const file = fs.createWriteStream(thumbnailName);
+
+    // Write data into local file
+    // res.pipe(file);
     const paramsBucket = {
       Bucket : process.env.S3_BUCKET_NAME,
       Key : thumbnailName,
-      Body : fs.createReadStream(thumbnailName),//fileContent
+      Body : file,//fs.createReadStream(thumbnailName),//fileContent
       content_type : 'image/JPG',
     };
     s3.upload(paramsBucket, (err, data) => {
