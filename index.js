@@ -62,7 +62,6 @@ function download(url,thumbnail,res,tweet) {
 
   
   streamThumbNail.on('data', (chunk) => {
-    console.log('Uploading "' + thumbnailName + '" to S3');
     const file = fs.createWriteStream(thumbnailName);
 
     // Write data into local file
@@ -75,7 +74,7 @@ function download(url,thumbnail,res,tweet) {
     };
     s3.upload(paramsBucket, (err, data) => {
       if(err){
-        console.log('errrrrrrrrrrrrroooooooooooorrrrBucket '+err); 
+        console.log('error '+err); 
       }else{
         console.log('success' + data.Location)
       }
@@ -87,7 +86,6 @@ function download(url,thumbnail,res,tweet) {
   });
 
   // const fileContent = fs.readFileSync('public/downloaded/'+thumbnailName);
-  // console.log('thumbnailNameBucket');
   // const paramsBucket = {
   //   Bucket : process.env.S3_BUCKET_NAME,
   //   Key : thumbnailName,
@@ -117,7 +115,6 @@ function download(url,thumbnail,res,tweet) {
     
           T.get('statuses/show', { id: tweet.in_reply_to_status_id_str, include_rts: true}).then(res => {
             var thumbnail = res.data.extended_entities.media[0].media_url;
-            console.log(thumbnail);
             var urlFromTweet = res.data.extended_entities.media[0].video_info.variants.filter(function(it){ return (it.bitrate === Math.max(...res.data.extended_entities.media[0].video_info.variants.filter(function(it){ return (it.content_type === 'video/mp4')}).map(function(it){return (it.bitrate)})))})[0].url;
             var fileName = urlFromTweet.substring(urlFromTweet.lastIndexOf('/')+1, urlFromTweet.lastIndexOf('?'));
             var fileNameWithoutExt = fileName.slice(0,fileName.lastIndexOf('.'));
@@ -211,12 +208,10 @@ async function resultFile(id, res) {
       }else{
         if(id.searchBar !== "1"){
           AllDataTweet.findOne({url_tweet: id.searchTweet }, { _id: 0}).then(function(result) {
-            console.log(result);
             resolve(result);
           });
         }else{
           AllDataTweet.find({$or:[{url_tweet: id.searchTweet }, { user_sc: id.searchTweet.toUpperCase() }, { tweet_sc: id.searchTweet.toUpperCase()}]}, { _id: 0}).then(function(result) {
-            console.log(result);
             resolve(result);
           });
         }
@@ -238,7 +233,6 @@ function responseCallback(err) {
 }
 
 if(process.env.NODE_ENV === 'production') {
-  console.log(process.env.NODE_ENV);
   app.use((req, res, next) => {
     if (req.header('x-forwarded-proto') !== 'https')
       res.redirect(`https://${req.header('host')}${req.url}`)
